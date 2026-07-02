@@ -187,8 +187,8 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
     let animationFrameId: number;
     let time = 0;
 
-    let lastWidth = window.innerWidth;
-    let lastHeight = window.innerHeight;
+    let lastWidth = 0;
+    let lastHeight = 0;
 
     const resizeCanvas = () => {
       const w = window.innerWidth;
