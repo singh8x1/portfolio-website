@@ -240,7 +240,12 @@ export default function App() {
                   ? 'bg-stone-200/90 border-stone-300 shadow-inner hover:border-red-500/40' 
                   : 'bg-slate-950/40 backdrop-blur-md border-white/[0.04] shadow-2xl shadow-cyan-500/5 hover:border-cyan-500/30'
               }`}>
-                <span className={`font-display text-4xl font-black tracking-tighter ${
+                <img 
+                  src={`./profile.jpg?t=${Date.now()}`} 
+                  alt="Sandeep Singh" 
+                  className="w-full h-full object-cover transition-all duration-700"
+                />
+                <span className={`monogram hidden font-display text-4xl font-black tracking-tighter ${
                   isJapaneseInkMode 
                     ? 'text-stone-800' 
                     : 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400'

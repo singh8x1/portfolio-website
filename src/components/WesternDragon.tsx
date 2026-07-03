@@ -30,6 +30,16 @@ interface Whale {
   color: string;
 }
 
+interface Jellyfish {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  pulsePhase: number;
+  color: string;
+}
+
 interface Particle {
   x: number;
   y: number;
@@ -62,7 +72,7 @@ interface Ripple {
 export default function WesternDragon({ isJapaneseInkMode = false }: { isJapaneseInkMode?: boolean }) {
   const [isLoading, setIsLoading] = useState(true);
   const [birdsEaten, setBirdsEaten] = useState(0);
-  const [dragonType, setDragonType] = useState<'western' | 'chinese' | 'indian'>('western');
+  const [dragonType, setDragonType] = useState<'mantaray' | 'eagle' | 'serpent'>('eagle');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const isJapaneseInkModeRef = useRef(isJapaneseInkMode);
@@ -74,6 +84,7 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
   const segmentsRef = useRef<Segment[]>([]);
   const birdsRef = useRef<Bird[]>([]);
   const whalesRef = useRef<Whale[]>([]);
+  const jellyfishRef = useRef<Jellyfish[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const ripplesRef = useRef<Ripple[]>([]);
   const headTargetRef = useRef({ x: 0, y: 0 });
@@ -81,7 +92,7 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
   const orbitAngleRef = useRef(0);
   const isLoadedRef = useRef(false);
   const mouthOpenRef = useRef(0); // 0 = closed, higher = frame countdown for snapping open
-  const dragonTypeRef = useRef<'western' | 'chinese' | 'indian'>('western');
+  const dragonTypeRef = useRef<'mantaray' | 'eagle' | 'serpent'>('eagle');
   const lastMouseActiveTimeRef = useRef(performance.now());
   const scrollYRef = useRef(0);
 
@@ -175,6 +186,22 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
       });
     }
     whalesRef.current = whales;
+
+    // 4. Initialize Jellyfish
+    const jellyfish: Jellyfish[] = [];
+    const numJellyfish = 7;
+    for (let i = 0; i < numJellyfish; i++) {
+      jellyfish.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 15 + 20,
+        pulsePhase: Math.random() * Math.PI * 2,
+        color: 'rgba(236, 72, 153, 0.4)' // Initial color
+      });
+    }
+    jellyfishRef.current = jellyfish;
   }, []);
 
   useEffect(() => {
@@ -213,9 +240,9 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
     const spawnWaterSplash = (clickX: number, clickY: number) => {
       const activeType = dragonTypeRef.current;
       let splashColor = 'rgba(34, 211, 238, 0.5)'; // default cyber cyan
-      if (activeType === 'chinese') {
-        splashColor = 'rgba(239, 68, 68, 0.55)';
-      } else if (activeType === 'indian') {
+      if (activeType === 'eagle') {
+        splashColor = 'rgba(255, 255, 255, 0.65)'; // Bright white/silver splashes
+      } else if (activeType === 'serpent') {
         splashColor = 'rgba(16, 185, 129, 0.55)';
       }
 
@@ -310,13 +337,13 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
     };
 
     const handleDblClick = () => {
-      let nextType: 'western' | 'chinese' | 'indian' = 'western';
-      if (dragonTypeRef.current === 'western') {
-        nextType = 'chinese';
-      } else if (dragonTypeRef.current === 'chinese') {
-        nextType = 'indian';
+      let nextType: 'mantaray' | 'eagle' | 'serpent' = 'mantaray';
+      if (dragonTypeRef.current === 'mantaray') {
+        nextType = 'eagle';
+      } else if (dragonTypeRef.current === 'eagle') {
+        nextType = 'serpent';
       } else {
-        nextType = 'western';
+        nextType = 'mantaray';
       }
       dragonTypeRef.current = nextType;
       setDragonType(nextType);
@@ -324,9 +351,9 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
       // Trigger spectacular particle shockwave around dragon head
       const headSeg = segmentsRef.current[0];
       if (headSeg) {
-        const color = nextType === 'chinese'
+        const color = nextType === 'eagle'
           ? 'rgba(239, 68, 68, 0.95)' // Fire/Crimson
-          : nextType === 'indian'
+          : nextType === 'serpent'
           ? 'rgba(52, 211, 153, 0.95)' // Emerald green
           : 'rgba(34, 211, 238, 0.95)'; // Cyan/Blue
 
@@ -580,11 +607,11 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
       let calculatedWiggleAmplitude = dragonSpeed * 0.22;
       let wiggleFreq = isLoadedRef.current ? 4.0 : 5.8;
 
-      if (currentBeastType === 'chinese') {
+      if (currentBeastType === 'eagle') {
         // High frequency, more expressive wave-slither for Chinese Lóng
         calculatedWiggleAmplitude = dragonSpeed * 0.27;
         wiggleFreq = isLoadedRef.current ? 5.4 : 6.6;
-      } else if (currentBeastType === 'indian') {
+      } else if (currentBeastType === 'serpent') {
         // Broad, heavy, low-frequency serpentine slither for Indian Naga
         calculatedWiggleAmplitude = dragonSpeed * 0.32;
         wiggleFreq = isLoadedRef.current ? 3.2 : 4.4;
@@ -631,9 +658,9 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
       const spawnBubbleChance = isJapaneseInkMode ? 0.55 : (isBreathing ? 0.45 : (hSpeed > 2 ? 0.35 : 0.15));
       if (Math.random() < spawnBubbleChance) {
         let bColor = 'rgba(34, 211, 238, 0.45)'; // Cyber cyan bubble
-        if (activeType === 'chinese') {
-          bColor = 'rgba(239, 68, 68, 0.45)'; // Crimson
-        } else if (activeType === 'indian') {
+        if (activeType === 'eagle') {
+          bColor = 'rgba(255, 255, 255, 0.45)'; // White bubble
+        } else if (activeType === 'serpent') {
           bColor = 'rgba(16, 185, 129, 0.45)'; // Emerald
         }
 
@@ -660,9 +687,9 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
         const nextSeg = segments[segIndex + 1] || seg;
         
         let sColor = 'rgba(34, 211, 238, 0.32)';
-        if (activeType === 'chinese') {
-          sColor = 'rgba(245, 158, 11, 0.35)'; // Amber/Gold
-        } else if (activeType === 'indian') {
+        if (activeType === 'eagle') {
+          sColor = 'rgba(255, 255, 255, 0.35)'; // White mist
+        } else if (activeType === 'serpent') {
           sColor = 'rgba(52, 211, 153, 0.35)'; // Mint Green
         }
 
@@ -685,9 +712,9 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
       if (hSpeed > 3.2 && Math.random() < 0.15) {
         const tail = segments[segments.length - 1];
         let vColor = 'rgba(6, 182, 212, 0.3)';
-        if (activeType === 'chinese') {
-          vColor = 'rgba(239, 68, 68, 0.3)';
-        } else if (activeType === 'indian') {
+        if (activeType === 'eagle') {
+          vColor = 'rgba(255, 255, 255, 0.3)'; // White vortex
+        } else if (activeType === 'serpent') {
           vColor = 'rgba(16, 185, 129, 0.3)';
         }
         ripplesRef.current.push({
@@ -1033,6 +1060,91 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
         ctx.restore();
       });
 
+      // --- 3.6 JELLYFISH SIMULATION ---
+      const jellyfishList = jellyfishRef.current;
+      jellyfishList.forEach((jelly) => {
+        jelly.pulsePhase += 0.03; // ethereal slow pulsing
+        const pulse = Math.sin(jelly.pulsePhase);
+        
+        jelly.x += jelly.vx * (1 + pulse * 0.5);
+        jelly.y += jelly.vy * (1 + pulse * 0.5);
+
+        // Drift slowly upwards naturally
+        jelly.vy -= 0.001;
+        jelly.vx += Math.sin(time * 0.2) * 0.005;
+
+        // Speed limit
+        const speed = Math.hypot(jelly.vx, jelly.vy);
+        if (speed > 0.8) {
+          jelly.vx = (jelly.vx / speed) * 0.8;
+          jelly.vy = (jelly.vy / speed) * 0.8;
+        }
+
+        // Avoid dragon head
+        const dToHead = Math.hypot(jelly.x - head.x, jelly.y - head.y);
+        if (dToHead < 300) {
+          const avoidForce = 0.01;
+          const angle = Math.atan2(jelly.y - head.y, jelly.x - head.x);
+          jelly.vx += Math.cos(angle) * avoidForce;
+          jelly.vy += Math.sin(angle) * avoidForce;
+        }
+
+        // Wrap around
+        if (jelly.x < -100) jelly.x = w + 100;
+        if (jelly.x > w + 100) jelly.x = -100;
+        if (jelly.y < -100) jelly.y = h + 100;
+        if (jelly.y > h + 100) jelly.y = -100;
+
+        ctx.save();
+        ctx.translate(jelly.x, jelly.y);
+        ctx.rotate(Math.atan2(jelly.vy, jelly.vx) + Math.PI/2); // Dome faces direction of travel
+
+        const jColor = isJapaneseInkMode 
+          ? `rgba(214, 211, 209, ${0.15 + pulse * 0.05})` // Soft warm white/stone
+          : `rgba(236, 72, 153, ${0.15 + pulse * 0.05})`; // Pink ethereal
+
+        const jStroke = isJapaneseInkMode
+          ? `rgba(168, 162, 158, 0.3)`
+          : `rgba(244, 114, 182, 0.4)`;
+
+        ctx.fillStyle = jColor;
+        ctx.strokeStyle = jStroke;
+        ctx.lineWidth = 1.0;
+        
+        if (!isJapaneseInkMode) {
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = 'rgba(236, 72, 153, 0.4)';
+        }
+
+        // Draw Jellyfish Bell
+        ctx.beginPath();
+        const bellWidth = jelly.size;
+        const bellHeight = jelly.size * (0.8 + pulse * 0.2); // Expands and contracts
+        
+        ctx.moveTo(-bellWidth, 0);
+        ctx.bezierCurveTo(-bellWidth, -bellHeight * 1.5, bellWidth, -bellHeight * 1.5, bellWidth, 0);
+        ctx.quadraticCurveTo(0, -bellHeight * 0.2, -bellWidth, 0);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw trailing tentacles
+        ctx.beginPath();
+        for (let i = -1; i <= 1; i += 0.5) {
+          const startX = bellWidth * 0.8 * i;
+          const length = jelly.size * (2.5 + Math.sin(jelly.pulsePhase * 2 + i) * 0.5);
+          
+          ctx.moveTo(startX, 0);
+          ctx.quadraticCurveTo(
+            startX + Math.sin(time + i) * 15, length * 0.5,
+            startX + Math.sin(time * 0.8 + i) * 20, length
+          );
+        }
+        ctx.strokeStyle = jStroke;
+        ctx.stroke();
+
+        ctx.restore();
+      });
+
       // --- 4. RENDER DRAGON PARTICLES/SPARKS ---
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -1317,10 +1429,10 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
         let middleGlow = 'rgba(34, 211, 238, 0.4)';
         let innerGlow = '#ffffff';
 
-        if (dragonTypeRef.current === 'chinese') {
-          outerGlow = 'rgba(239, 68, 68, 0.15)'; // Red aura
-          middleGlow = 'rgba(245, 158, 11, 0.45)'; // Gold/Orange core
-        } else if (dragonTypeRef.current === 'indian') {
+        if (dragonTypeRef.current === 'eagle') {
+          outerGlow = 'rgba(255, 255, 255, 0.15)'; // Pale white/silver aura
+          middleGlow = 'rgba(226, 232, 240, 0.45)'; // Silver core
+        } else if (dragonTypeRef.current === 'serpent') {
           outerGlow = 'rgba(16, 185, 129, 0.16)'; // Emerald aura
           middleGlow = 'rgba(250, 204, 21, 0.4)'; // Warm Gold core
         }
@@ -1358,91 +1470,68 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
 
           const type = dragonTypeRef.current;
 
-          if (type === 'chinese') {
-            // --- CHINESE DRAGON (LÓNG) HEAD FEATURES ---
-            // 1. Long, flowing barbels (whiskers) waving majestically
-            ctx.strokeStyle = '#f59e0b'; // Gold
-            ctx.lineWidth = 1.8;
-            ctx.lineCap = 'round';
+          if (type === 'eagle') {
+            // --- GRIFFIN HEAD FEATURES ---
+            // 1. Feathered crest/mane (Eagle neck feathers)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'; // White feathers
+            ctx.beginPath();
+            ctx.moveTo(10, 8);
+            ctx.lineTo(-20, 22);
+            ctx.lineTo(-10, 10);
+            ctx.lineTo(-28, 14);
+            ctx.lineTo(-14, 0);
+            ctx.lineTo(-28, -14);
+            ctx.lineTo(-10, -10);
+            ctx.lineTo(-20, -22);
+            ctx.lineTo(10, -8);
+            ctx.closePath();
+            ctx.fill();
             
-            // Left barbel
-            ctx.beginPath();
-            ctx.moveTo(25, -2);
-            const w1x = 48 + Math.sin(time * 4.0) * 8;
-            const w1y = -18 + Math.cos(time * 2.8) * 12;
-            ctx.quadraticCurveTo(38, -18, w1x, w1y);
+            // Outer feather strokes
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // Right barbel
-            ctx.beginPath();
-            ctx.moveTo(25, 2);
-            const w2x = 48 + Math.sin(time * 4.0 + 1.2) * 8;
-            const w2y = 18 + Math.cos(time * 2.8 + 1.2) * 12;
-            ctx.quadraticCurveTo(38, 18, w2x, w2y);
-            ctx.stroke();
-
-            // 2. Branching stag-like golden antlers
-            ctx.strokeStyle = '#facc15'; // Yellow Gold
-            ctx.lineWidth = 2.4;
-            // Left antler
-            ctx.beginPath();
-            ctx.moveTo(-10, -8);
-            ctx.lineTo(-28, -24);
-            ctx.moveTo(-19, -16);
-            ctx.lineTo(-32, -14); // branch
-            ctx.stroke();
-
-            // Right antler
-            ctx.beginPath();
-            ctx.moveTo(-10, 8);
-            ctx.lineTo(-28, 24);
-            ctx.moveTo(-19, 16);
-            ctx.lineTo(-32, 14); // branch
-            ctx.stroke();
-
-            // 3. Flowing lion beard
-            ctx.fillStyle = 'rgba(245, 158, 11, 0.8)';
-            ctx.beginPath();
-            ctx.moveTo(8, 6);
-            ctx.lineTo(-14, 18);
-            ctx.lineTo(0, 4);
-            ctx.lineTo(-15, 0);
-            ctx.lineTo(0, -4);
-            ctx.lineTo(-14, -18);
-            ctx.lineTo(8, -6);
-            ctx.closePath();
-            ctx.fill();
-
-            // 4. Skull base plate (Semi-transparent rich deep red)
-            ctx.fillStyle = 'rgba(127, 29, 29, 0.75)';
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 2.5;
+            // 2. Eagle Skull Plate (Sleeker, aerodynamic white/silver head)
+            ctx.fillStyle = 'rgba(248, 250, 252, 0.9)';
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2.0;
 
             ctx.beginPath();
-            ctx.moveTo(25, 0);
-            ctx.lineTo(12, -14);
-            ctx.lineTo(-8, -16);
-            ctx.lineTo(-24, -8);
-            ctx.lineTo(-24, 8);
-            ctx.lineTo(-8, 16);
-            ctx.lineTo(12, 14);
+            ctx.moveTo(15, 0); // Beak base
+            ctx.lineTo(5, -12); // Forehead
+            ctx.lineTo(-12, -14); // Back top
+            ctx.lineTo(-16, 0); // Back middle
+            ctx.lineTo(-12, 14); // Back bottom
+            ctx.lineTo(5, 12); // Jaw base
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
 
-            // 5. Golden vertex nodes
-            ctx.fillStyle = '#facc15';
-            const points = [
-              {x: 25, y: 0}, {x: 12, y: -14}, {x: -8, y: -16},
-              {x: -24, y: -8}, {x: -24, y: 8}, {x: -8, y: 16}, {x: 12, y: 14}
-            ];
-            points.forEach(pt => {
-              ctx.beginPath();
-              ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
-              ctx.fill();
-            });
+            // 3. Sharp Hooked Eagle Beak (Golden)
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.95)'; // Yellow Gold
+            ctx.strokeStyle = '#ca8a04';
+            ctx.lineWidth = 1.5;
+            
+            ctx.beginPath();
+            ctx.moveTo(12, -6); // Top base of beak
+            ctx.quadraticCurveTo(35, -2, 40, 10); // Hooked tip
+            ctx.quadraticCurveTo(25, 6, 12, 6); // Bottom base
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
 
-          } else if (type === 'indian') {
+            // 4. Feathery Tufts (ears)
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-5, -10);
+            ctx.quadraticCurveTo(-15, -25, -25, -20);
+            ctx.moveTo(-5, 10);
+            ctx.quadraticCurveTo(-15, 25, -25, 20);
+            ctx.stroke();
+
+          } else if (type === 'serpent') {
             // --- INDIAN DRAGON / SERPENT (NĀGA) HEAD FEATURES ---
             // 1. Flared cobra-style energy hood pulsing behind the head
             const hoodPulse = 1.0 + Math.sin(time * 3.5) * 0.08;
@@ -1525,39 +1614,42 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
             ctx.shadowBlur = 0; // reset
 
           } else {
-            // --- WESTERN WYVERN HEAD FEATURES (ORIGINAL) ---
-            // Big Horns sweeping backward and upwards with neon glow
-            ctx.strokeStyle = '#38bdf8'; // Sky Neon
-            ctx.lineWidth = 3.5;
-            ctx.lineCap = 'round';
+            // --- MANTARAY HEAD FEATURES ---
+            // Wide sweeping cephalic fins (horns) projecting forward
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.8)';
+            ctx.strokeStyle = '#22d3ee'; // Sky Neon
+            ctx.lineWidth = 2.0;
 
-            // Left sweeping horn
+            // Left cephalic fin
             ctx.beginPath();
-            ctx.moveTo(-12, -10);
-            ctx.quadraticCurveTo(-26, -26, -42, -22);
-            ctx.quadraticCurveTo(-30, -12, -18, -6);
+            ctx.moveTo(15, -12);
+            ctx.quadraticCurveTo(35, -25, 45, -12);
+            ctx.quadraticCurveTo(30, -5, 20, -6);
+            ctx.closePath();
+            ctx.fill();
             ctx.stroke();
 
-            // Right sweeping horn
+            // Right cephalic fin
             ctx.beginPath();
-            ctx.moveTo(-12, 10);
-            ctx.quadraticCurveTo(-26, 26, -42, 22);
-            ctx.quadraticCurveTo(-30, 12, -18, 6);
+            ctx.moveTo(15, 12);
+            ctx.quadraticCurveTo(35, 25, 45, 12);
+            ctx.quadraticCurveTo(30, 5, 20, 6);
+            ctx.closePath();
+            ctx.fill();
             ctx.stroke();
 
-            // Skull base plate
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+            // Flat streamlined ray head plate
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
             ctx.strokeStyle = '#22d3ee'; // Cyan
             ctx.lineWidth = 2.5;
 
             ctx.beginPath();
-            ctx.moveTo(25, 0);
-            ctx.lineTo(12, -14);
-            ctx.lineTo(-8, -16);
-            ctx.lineTo(-24, -8);
-            ctx.lineTo(-24, 8);
-            ctx.lineTo(-8, 16);
-            ctx.lineTo(12, 14);
+            ctx.moveTo(28, 0); // Snout tip
+            ctx.lineTo(20, -14);
+            ctx.quadraticCurveTo(0, -22, -20, -18);
+            ctx.lineTo(-30, 0); // Back of head
+            ctx.quadraticCurveTo(0, 22, -20, 18);
+            ctx.lineTo(20, 14);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
@@ -1599,10 +1691,10 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
           
           let jawFill = 'rgba(30, 41, 59, 0.8)';
           let jawStroke = '#22d3ee';
-          if (type === 'chinese') {
-            jawFill = 'rgba(127, 29, 29, 0.8)';
-            jawStroke = '#ef4444';
-          } else if (type === 'indian') {
+          if (type === 'eagle') {
+            jawFill = 'rgba(250, 204, 21, 0.9)'; // Golden lower beak
+            jawStroke = '#ca8a04';
+          } else if (type === 'serpent') {
             jawFill = 'rgba(6, 78, 59, 0.8)';
             jawStroke = '#34d399';
           }
@@ -1611,30 +1703,38 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
           ctx.strokeStyle = jawStroke;
           ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.moveTo(10, 2);
-          ctx.lineTo(24, 1);
-          ctx.lineTo(15, 12);
-          ctx.lineTo(2, 6);
+          if (type === 'eagle') {
+            ctx.moveTo(10, 6);
+            ctx.lineTo(25, 8); // Lower beak
+            ctx.lineTo(12, 12);
+          } else {
+            ctx.moveTo(10, 2);
+            ctx.lineTo(24, 1);
+            ctx.lineTo(15, 12);
+            ctx.lineTo(2, 6);
+          }
           ctx.closePath();
           ctx.fill();
           ctx.stroke();
 
-          // Small fangs inside
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.moveTo(18, 1);
-          ctx.lineTo(15, 5);
-          ctx.lineTo(13, 1);
-          ctx.fill();
+          if (type !== 'eagle') {
+            // Small fangs inside (Griffin doesn't need fangs)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(18, 1);
+            ctx.lineTo(15, 5);
+            ctx.lineTo(13, 1);
+            ctx.fill();
+          }
           ctx.restore();
 
           // Glowing elemental eyes (different colors!)
           let eyeColor = '#ef4444'; // default hot red for Western
           let eyeShadow = '#f43f5e';
-          if (type === 'chinese') {
+          if (type === 'eagle') {
             eyeColor = '#f59e0b'; // golden fierce eyes
             eyeShadow = '#facc15';
-          } else if (type === 'indian') {
+          } else if (type === 'serpent') {
             eyeColor = '#fb7185'; // glowing ruby rose eyes
             eyeShadow = '#e11d48';
           }
@@ -1651,32 +1751,34 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
         } else if (isTailTip) {
           // --- BREED SPECIFIC TAIL TIPS ---
           const type = dragonTypeRef.current;
-          if (type === 'chinese') {
-            // Flowing fiery crimson/gold fan tail hair tuft
-            ctx.fillStyle = 'rgba(245, 158, 11, 0.75)'; // golden core
-            ctx.strokeStyle = '#ef4444'; // red edge
-            ctx.lineWidth = 2.0;
+          if (type === 'eagle') {
+            // Eagle Feather Tail
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; // White feathers
+            ctx.strokeStyle = '#e2e8f0'; // Light grey edge
+            ctx.lineWidth = 1.5;
 
             ctx.beginPath();
             ctx.moveTo(10, 0);
-            ctx.quadraticCurveTo(-15, -24, -38, -15);
-            ctx.quadraticCurveTo(-26, 0, -45, 0); // main tail plume flare
-            ctx.quadraticCurveTo(-26, 0, -38, 15);
-            ctx.quadraticCurveTo(-15, 24, 10, 0);
+            ctx.lineTo(-20, -15);
+            ctx.lineTo(-40, -5);
+            ctx.lineTo(-45, 0);
+            ctx.lineTo(-40, 5);
+            ctx.lineTo(-20, 15);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
 
-            // Gold spark emitters
-            ctx.fillStyle = '#facc15';
-            const sparks = [{x: 10, y: 0}, {x: -25, y: -8}, {x: -45, y: 0}, {x: -25, y: 8}];
-            sparks.forEach(pt => {
-              ctx.beginPath();
-              ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
-              ctx.fill();
-            });
+            // Feather details
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-38, 0);
+            ctx.moveTo(-5, -5);
+            ctx.lineTo(-35, -5);
+            ctx.moveTo(-5, 5);
+            ctx.lineTo(-35, 5);
+            ctx.stroke();
 
-          } else if (type === 'indian') {
+          } else if (type === 'serpent') {
             // Elegant trident-like spearhead (Trishula) representing Naga divinity
             ctx.fillStyle = 'rgba(250, 204, 21, 0.8)'; // Golden shine
             ctx.strokeStyle = '#10b981'; // Emerald edge
@@ -1709,18 +1811,15 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
             ctx.fill();
 
           } else {
-            // --- ORIGINAL SPADE DRAGON TAIL CLUB (WESTERN) ---
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+            // --- MANTARAY STINGER TAIL ---
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.8)';
             ctx.strokeStyle = '#22d3ee';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1.5;
 
             ctx.beginPath();
-            ctx.moveTo(10, 0);
-            ctx.lineTo(-25, -15);
-            ctx.lineTo(-12, -4);
-            ctx.lineTo(-35, 0); // Tail spike/point
-            ctx.lineTo(-12, 4);
-            ctx.lineTo(-25, 15);
+            ctx.moveTo(10, -2);
+            ctx.lineTo(-45, 0); // Long thin stinger spike
+            ctx.lineTo(10, 2);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
@@ -1750,15 +1849,18 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
           let colorMain = isEven ? '#06b6d4' : '#10b981';
           let colorCore = isEven ? '#22d3ee' : '#34d399';
           let colorGlow = isEven ? 'rgba(6, 182, 212, 0.45)' : 'rgba(16, 185, 129, 0.45)';
+          let colorSpine = colorMain;
 
-          if (type === 'chinese') {
-            colorMain = isEven ? '#ef4444' : '#f59e0b'; // Red / Gold
-            colorCore = isEven ? '#facc15' : '#ea580c'; // Yellow / Orange
-            colorGlow = isEven ? 'rgba(239, 68, 68, 0.45)' : 'rgba(245, 158, 11, 0.45)';
-          } else if (type === 'indian') {
+          if (type === 'eagle') {
+            colorMain = isEven ? '#fcd34d' : '#fbbf24'; // Lion Gold / Tan
+            colorCore = isEven ? '#fde68a' : '#f59e0b'; // Light Gold / Deep Gold
+            colorGlow = isEven ? 'rgba(251, 191, 36, 0.6)' : 'rgba(245, 158, 11, 0.4)';
+            colorSpine = isEven ? '#ffffff' : '#e2e8f0'; // White feathered back ridge
+          } else if (type === 'serpent') {
             colorMain = isEven ? '#10b981' : '#047857'; // Emerald / Deep Green
             colorCore = isEven ? '#facc15' : '#34d399'; // Bright Gold / Mint
             colorGlow = isEven ? 'rgba(16, 185, 129, 0.45)' : 'rgba(52, 211, 153, 0.45)';
+            colorSpine = colorMain;
           }
 
           if (isJapaneseInkMode) {
@@ -1836,7 +1938,7 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
             ctx.stroke();
 
             // Back Spine Scales (Glowing Neon Pointy Plating)
-            ctx.fillStyle = colorMain;
+            ctx.fillStyle = colorSpine;
             ctx.beginPath();
             ctx.moveTo(0, -seg.size);
             ctx.lineTo(5, -seg.size - 8);
@@ -1845,28 +1947,86 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
             ctx.fill();
           }
 
-          // --- 6. DRAGON WINGS ATTACHMENT (WESTERN ONLY) ---
-          if (type === 'western' && (i === 4 || i === 5)) {
-            const wingSideFactor = (i === 4) ? 1 : 0.85; // Subtle variation between wings
+          // --- 6. DRAGON WINGS ATTACHMENT (WESTERN ONLY, AND GRIFFIN) ---
+          if ((type === 'mantaray' || type === 'eagle') && i === 4) {
+            const wingSideFactor = type === 'eagle' ? 0.7 : 2.0; // Mantaray has huge wings
             
-            // Speed-responsive wing flapping frequency and amplitude for hyper-fluid wingbeats
+            // Speed-responsive fin flapping frequency and amplitude for hyper-fluid wingbeats
             const velocity = Math.hypot(headTargetRef.current.x - segments[0].x, headTargetRef.current.y - segments[0].y);
-            const dynamicSpeed = 3.2 + Math.min(4.8, velocity * 0.18);
-            const dynamicAmplitude = 0.35 + Math.min(0.18, velocity * 0.004);
-            const wingPhase = time * dynamicSpeed + i * 0.45;
-            const flapAngle = Math.sin(wingPhase) * dynamicAmplitude + 0.12;
+            
+            let wingPhase = 0;
+            let flapAngle = 0;
+            
+            if (type === 'eagle') {
+              // Griffin: Glides when slow, powerful flaps when fast
+              const glideMode = velocity < 6;
+              const flapAmp = 0.05 + Math.min(0.35, velocity * 0.015);
+              wingPhase = time * (1.0 + Math.min(4.5, velocity * 0.12));
+              flapAngle = Math.sin(wingPhase) * flapAmp + (glideMode ? -0.1 : 0.15);
+            } else {
+              // Mantaray: majestic slow undulating flaps
+              const glideMode = velocity < 4;
+              const flapAmp = glideMode ? 0.1 : 0.2 + Math.min(0.2, velocity * 0.01);
+              wingPhase = time * (1.2 + Math.min(2.0, velocity * 0.05));
+              flapAngle = Math.sin(wingPhase) * flapAmp + 0.1;
+            }
 
             // Draw Left Wing
             ctx.save();
             ctx.rotate(-Math.PI / 2 - flapAngle); // Rotate wing out and flap it
-            drawWyvernWing(ctx, seg.size, wingSideFactor, wingPhase);
+            if (type === 'eagle') {
+              drawFeatherWing(ctx, seg.size, wingSideFactor, wingPhase, velocity);
+            } else {
+              drawFin(ctx, seg.size, wingSideFactor, wingPhase);
+            }
             ctx.restore();
 
             // Draw Right Wing
             ctx.save();
             ctx.rotate(Math.PI / 2 + flapAngle); // Opposite direction
-            drawWyvernWing(ctx, seg.size, wingSideFactor, wingPhase);
+            if (type === 'eagle') {
+              drawFeatherWing(ctx, seg.size, wingSideFactor, wingPhase, velocity);
+            } else {
+              drawFin(ctx, seg.size, wingSideFactor, wingPhase);
+            }
             ctx.restore();
+          }
+
+          // --- 7. EAGLE LEGS ---
+          if (type === 'eagle') {
+            const velocity = Math.hypot(headTargetRef.current.x - segments[0].x, headTargetRef.current.y - segments[0].y);
+            const legSpeed = 3.0 + Math.min(6.0, velocity * 0.2);
+            const legSwing = Math.sin(time * legSpeed) * (0.15 + Math.min(0.3, velocity * 0.01)); // more swing when moving fast
+            
+            if (i === 8) { // Legs (eagle talons)
+              ctx.save();
+              ctx.fillStyle = '#facc15';
+              ctx.strokeStyle = '#ca8a04';
+              ctx.lineWidth = 2;
+              
+              // Left leg
+              ctx.save();
+              ctx.rotate(-Math.PI / 2.5 + legSwing);
+              ctx.beginPath();
+              ctx.moveTo(0, 0);
+              ctx.quadraticCurveTo(10, -5, 20, -5); // Thigh
+              ctx.lineTo(25, -2); // Talon base
+              ctx.lineTo(15, 2);
+              ctx.fill(); ctx.stroke();
+              ctx.restore();
+
+              // Right leg
+              ctx.save();
+              ctx.rotate(Math.PI / 2.5 - legSwing);
+              ctx.beginPath();
+              ctx.moveTo(0, 0);
+              ctx.quadraticCurveTo(10, 5, 20, 5);
+              ctx.lineTo(25, 2);
+              ctx.lineTo(15, -2);
+              ctx.fill(); ctx.stroke();
+              ctx.restore();
+              ctx.restore();
+            }
           }
         }
 
@@ -1877,128 +2037,185 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
       animationFrameId = requestAnimationFrame(render);
     };
 
-    // Helper to draw realistic bat-like/wyvern wings with holographic constellation vectors and particle grids
-    const drawWyvernWing = (context: CanvasRenderingContext2D, baseSize: number, scale: number, wingPhase: number) => {
+    // Helper to draw realistic eagle-like feathered wings for the Griffin
+    const drawFeatherWing = (context: CanvasRenderingContext2D, baseSize: number, scale: number, wingPhase: number, velocity: number = 0) => {
       const wingLength = 110 * scale;
       const isJapaneseInkMode = isJapaneseInkModeRef.current;
-
-      if (isJapaneseInkMode) {
-        context.strokeStyle = '#44403c';
-        context.lineWidth = 1.5;
-      } else {
-        context.strokeStyle = 'rgba(34, 211, 238, 0.45)';
-        context.lineWidth = 1.8;
-      }
-
-      // Natural, fluid flexing calculation for organic skeletal movement
-      const flex = Math.sin(wingPhase) * 0.15;
-
-      const thumbX = wingLength * (0.45 + flex * 0.08);
-      const thumbY = -wingLength * (0.18 + flex * 0.12);
       
-      const finger1X = wingLength * (0.85 + flex * 0.10);
-      const finger1Y = -wingLength * (0.10 - flex * 0.15);
-
-      const finger2X = wingLength * (0.95 - flex * 0.06);
-      const finger2Y = wingLength * (0.25 + flex * 0.20);
-
-      const finger3X = wingLength * (0.72 - flex * 0.12);
-      const finger3Y = wingLength * (0.58 + flex * 0.14);
-
-      // 1. Draw elegant outer bone outlines as dashed glowing paths (constellation links)
-      context.setLineDash([3, 4]);
+      const wingFlex = Math.sin(wingPhase) * (0.1 + Math.min(0.2, velocity * 0.02));
+      
+      context.save();
+      
+      // Main wing arm (bone)
       context.beginPath();
       context.moveTo(0, 0);
-      context.lineTo(thumbX, thumbY);
-      context.lineTo(finger1X, finger1Y);
-      context.quadraticCurveTo(wingLength * 0.88, wingLength * 0.1, finger2X, finger2Y);
-      context.quadraticCurveTo(wingLength * 0.82, wingLength * 0.42, finger3X, finger3Y);
-      context.quadraticCurveTo(wingLength * 0.35, wingLength * 0.35, 0, 0);
+      context.quadraticCurveTo(wingLength * 0.4, wingLength * -0.2, wingLength, wingLength * 0.1 + wingFlex * 30);
+      context.lineWidth = 4 * scale;
+      context.strokeStyle = isJapaneseInkMode ? '#292524' : '#fbbf24'; // Golden bone/edge
       context.stroke();
 
-      // Draw interior support struts
-      context.beginPath();
-      context.moveTo(thumbX, thumbY);
-      context.lineTo(finger2X, finger2Y);
-      context.moveTo(thumbX, thumbY);
-      context.lineTo(finger3X, finger3Y);
-      context.stroke();
-      context.setLineDash([]); // Reset line dash
+      // Draw primary feathers (long outer feathers)
+      const numPrimaries = 7;
+      context.fillStyle = isJapaneseInkMode ? 'rgba(68, 64, 60, 0.9)' : 'rgba(255, 255, 255, 0.95)';
+      context.strokeStyle = isJapaneseInkMode ? '#1c1917' : '#e2e8f0';
+      context.lineWidth = 1.5;
 
-      // 2. Generate and draw a shimmering mathematical matrix of particle points inside the membranes
-      const addMembraneGrid = (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, rows: number, cols: number) => {
-        for (let r = 0; r <= rows; r++) {
-          const t1 = r / rows;
-          // Interpolate along primary bone
-          const xa = x1 * (1 - t1) + x2 * t1;
-          const ya = y1 * (1 - t1) + y2 * t1;
-          // Interpolate along secondary bone
-          const xb = x1 * (1 - t1) + x3 * t1;
-          const yb = y1 * (1 - t1) + y3 * t1;
-
-          for (let c = 1; c < cols; c++) {
-            const t2 = c / cols;
-            const px = xa * (1 - t2) + xb * t2;
-            const py = ya * (1 - t2) + yb * t2;
-            
-            // Dynamic breathing pulse based on position and time
-            const pulse = Math.sin(time * 5.8 + (r * 1.5 + c * 0.8)) * 0.9 + 1.4;
-            const isBright = (r + c) % 3 === 0;
-            
-            if (isJapaneseInkMode) {
-              context.fillStyle = isBright ? 'rgba(185, 28, 28, 0.75)' : 'rgba(41, 37, 36, 0.4)';
-            } else {
-              context.fillStyle = isBright ? 'rgba(34, 211, 238, 0.85)' : 'rgba(56, 189, 248, 0.45)';
-            }
-            context.beginPath();
-            context.arc(px, py, pulse * scale, 0, Math.PI * 2);
-            context.fill();
-
-            // Occasional outer glow rings for a stardust feel
-            if ((r + c) % 4 === 0 && pulse > 1.6) {
-              if (isJapaneseInkMode) {
-                context.strokeStyle = 'rgba(28, 25, 23, 0.1)';
-              } else {
-                context.strokeStyle = 'rgba(129, 140, 248, 0.18)';
-              }
-              context.lineWidth = 0.5;
-              context.beginPath();
-              context.arc(px, py, pulse * 3.2 * scale, 0, Math.PI * 2);
-              context.stroke();
-            }
-          }
-        }
-      };
-
-      // Populate grid particles inside all three wing segments
-      addMembraneGrid(0, 0, thumbX, thumbY, finger1X, finger1Y, 4, 4);
-      addMembraneGrid(thumbX, thumbY, finger1X, finger1Y, finger2X, finger2Y, 4, 4);
-      addMembraneGrid(thumbX, thumbY, finger2X, finger2Y, finger3X, finger3Y, 4, 4);
-
-      // 3. Draw high-end starburst sparkle nodes at main joint positions
-      context.fillStyle = isJapaneseInkMode ? '#b91c1c' : '#ffffff';
-      const nodes = [
-        { x: 0, y: 0 },
-        { x: thumbX, y: thumbY },
-        { x: finger1X, y: finger1Y },
-        { x: finger2X, y: finger2Y },
-        { x: finger3X, y: finger3Y }
-      ];
-      nodes.forEach(n => {
+      for (let i = 0; i < numPrimaries; i++) {
+        const t = i / (numPrimaries - 1);
+        const startX = wingLength * (0.6 + t * 0.4);
+        const startY = (wingLength * -0.05 * (1-t) + (wingLength * 0.1 + wingFlex * 30) * t);
+        
+        const angle = -0.2 + t * 0.8;
+        const featherLen = wingLength * (0.8 - t * 0.3);
+        
+        const endX = startX + Math.cos(angle) * featherLen;
+        const endY = startY + Math.sin(angle) * featherLen;
+        
         context.beginPath();
-        context.arc(n.x, n.y, 2.6, 0, Math.PI * 2);
+        context.moveTo(startX, startY);
+        context.quadraticCurveTo(startX + 10, startY + featherLen/2, endX, endY);
+        context.quadraticCurveTo(startX - 10, startY + featherLen/2, startX, startY);
         context.fill();
-
-        // Delicate starlight cross
-        context.strokeStyle = isJapaneseInkMode ? 'rgba(41, 37, 36, 0.5)' : 'rgba(255, 255, 255, 0.9)';
-        context.lineWidth = 0.85;
-        context.beginPath();
-        context.moveTo(n.x - 5, n.y);
-        context.lineTo(n.x + 5, n.y);
-        context.moveTo(n.x, n.y - 5);
-        context.lineTo(n.x, n.y + 5);
         context.stroke();
-      });
+      }
+
+      // Draw secondary feathers (shorter inner feathers)
+      const numSecondaries = 8;
+      context.fillStyle = isJapaneseInkMode ? 'rgba(120, 113, 108, 0.9)' : 'rgba(241, 245, 249, 0.95)';
+      
+      for (let i = 0; i < numSecondaries; i++) {
+        const t = i / numSecondaries;
+        const startX = wingLength * (0.1 + t * 0.5);
+        const startY = (wingLength * -0.15 * (1-t) + wingLength * -0.05 * t);
+        
+        const angle = 0.5 + t * 0.4;
+        const featherLen = wingLength * 0.5;
+        
+        const endX = startX + Math.cos(angle) * featherLen;
+        const endY = startY + Math.sin(angle) * featherLen;
+        
+        context.beginPath();
+        context.moveTo(startX, startY);
+        context.quadraticCurveTo(startX + 8, startY + featherLen/2, endX, endY);
+        context.quadraticCurveTo(startX - 8, startY + featherLen/2, startX, startY);
+        context.fill();
+        context.stroke();
+      }
+      
+      context.restore();
+    };
+
+    // Helper to draw realistic, aquatic fins for a leviathan/dragon
+    const drawFin = (context: CanvasRenderingContext2D, baseSize: number, scale: number, wingPhase: number) => {
+      const finLength = 110 * scale;
+      const isJapaneseInkMode = isJapaneseInkModeRef.current;
+      
+      // Fin undulation (wave)
+      const finFlex = Math.sin(wingPhase) * 0.15;
+      const finWave = Math.cos(wingPhase * 1.5) * 0.12;
+      
+      // Main fin points (like a fish's pectoral fin)
+      const fStartX = 0;
+      const fStartY = 0;
+      
+      // The leading edge curves back
+      const leadCtrlX = finLength * 0.4;
+      const leadCtrlY = finLength * -0.3 + finFlex * 15;
+      const fTipX = finLength * 0.95;
+      const fTipY = finLength * 0.15 + finFlex * 30;
+      
+      // The trailing edge is scalloped or curves back inwards
+      const trailCtrlX = finLength * 0.6;
+      const trailCtrlY = finLength * 0.6 + finWave * 20;
+      
+      const fBottomX = finLength * 0.15;
+      const fBottomY = finLength * 0.45;
+      
+      // Draw fin membrane
+      context.beginPath();
+      context.moveTo(fStartX, fStartY);
+      context.quadraticCurveTo(leadCtrlX, leadCtrlY, fTipX, fTipY);
+      context.quadraticCurveTo(trailCtrlX, trailCtrlY, fBottomX, fBottomY);
+      context.lineTo(fStartX, fStartY);
+      
+      if (isJapaneseInkMode) {
+        const grad = context.createLinearGradient(0, 0, fTipX, fTipY);
+        grad.addColorStop(0, 'rgba(41, 37, 36, 0.95)');
+        grad.addColorStop(0.5, 'rgba(68, 64, 60, 0.65)');
+        grad.addColorStop(1, 'rgba(120, 113, 108, 0.15)');
+        context.fillStyle = grad;
+        context.fill();
+        
+        context.lineWidth = 1.8;
+        context.strokeStyle = 'rgba(28, 25, 23, 0.85)';
+        context.stroke();
+      } else {
+        const grad = context.createLinearGradient(0, 0, fTipX, fTipY);
+        grad.addColorStop(0, 'rgba(14, 165, 233, 0.85)');   // Deep water blue
+        grad.addColorStop(0.4, 'rgba(45, 212, 191, 0.65)'); // Teal mid
+        grad.addColorStop(0.8, 'rgba(167, 243, 208, 0.35)'); // Light seafoam outer
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');  // Soft edge
+        
+        context.fillStyle = grad;
+        context.shadowColor = 'rgba(45, 212, 191, 0.6)';
+        context.shadowBlur = 12 * scale;
+        context.fill();
+        
+        // Edge glow
+        context.lineWidth = 2.0 * scale;
+        context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        context.stroke();
+      }
+
+      // Fin rays (spines)
+      context.save();
+      if (isJapaneseInkMode) {
+        context.strokeStyle = 'rgba(41, 37, 36, 0.55)';
+        context.lineWidth = 1.4 * scale;
+      } else {
+        context.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+        context.lineWidth = 1.6 * scale;
+        context.shadowBlur = 0;
+      }
+      
+      // Draw 6 radiating spines
+      for (let i = 1; i <= 6; i++) {
+        const t = i / 7;
+        
+        // End points curve along the edge
+        const endX = fTipX * (1 - t) + fBottomX * t + (Math.sin(t * Math.PI) * 10 * scale);
+        const endY = fTipY * (1 - t) + fBottomY * t + (Math.cos(t * Math.PI) * 10 * scale);
+        
+        const ctrlX = leadCtrlX * (1 - t) + trailCtrlX * t;
+        const ctrlY = leadCtrlY * (1 - t) + trailCtrlY * t;
+        
+        context.beginPath();
+        context.moveTo(fStartX, fStartY);
+        context.quadraticCurveTo(ctrlX * 0.6, ctrlY * 0.6, endX, endY);
+        context.stroke();
+      }
+      context.restore();
+      
+      // Bioluminescent glowing nodes/bubbles along the fin base/spines
+      if (!isJapaneseInkMode) {
+        for (let i = 1; i <= 4; i++) {
+          const t = i / 5;
+          const px = fTipX * (1 - t) + fBottomX * t;
+          const py = fTipY * (1 - t) + fBottomY * t;
+          
+          context.beginPath();
+          context.arc(px * 0.7, py * 0.7, 2.0 * scale, 0, Math.PI * 2);
+          context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          context.shadowColor = 'rgba(255, 255, 255, 1)';
+          context.shadowBlur = 8 * scale;
+          context.fill();
+
+          context.beginPath();
+          context.arc(px * 0.7, py * 0.7, 1.0 * scale, 0, Math.PI * 2);
+          context.fillStyle = 'rgba(14, 165, 233, 1)';
+          context.fill();
+        }
+      }
     };
 
     render();
@@ -2118,8 +2335,8 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
           >
             <div className={`h-2.5 w-2.5 rounded-full animate-pulse transition-all duration-500 ${
               isJapaneseInkMode ? 'bg-red-600 shadow-[0_0_8px_#dc2626]' :
-              dragonType === 'chinese' ? 'bg-red-500 shadow-[0_0_10px_#ef4444]' :
-              dragonType === 'indian' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' :
+              dragonType === 'eagle' ? 'bg-amber-400 shadow-[0_0_10px_#fbbf24]' :
+              dragonType === 'serpent' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' :
               'bg-cyan-400 shadow-[0_0_10px_#22d3ee]'
             }`} />
             <div className="flex flex-col">
@@ -2135,9 +2352,9 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
                   <span className="text-red-700">Sumi-e Dragon</span>
                 ) : (
                   <>
-                    {dragonType === 'chinese' && <span className="text-red-400">Chinese Lóng</span>}
-                    {dragonType === 'indian' && <span className="text-emerald-400">Indian Nāga</span>}
-                    {dragonType === 'western' && <span className="text-cyan-400">Western Wyvern</span>}
+                    {dragonType === 'eagle' && <span className="text-amber-400">Golden Eagle</span>}
+                    {dragonType === 'serpent' && <span className="text-emerald-400">Emerald Serpent</span>}
+                    {dragonType === 'mantaray' && <span className="text-cyan-400">Cosmic Mantaray</span>}
                   </>
                 )}
               </span>
@@ -2171,8 +2388,8 @@ export default function WesternDragon({ isJapaneseInkMode = false }: { isJapanes
                 <span>Eaten:</span>
                 <span className={`transition-colors duration-500 ${
                   isJapaneseInkMode ? 'text-red-700 font-extrabold text-sm' :
-                  dragonType === 'chinese' ? 'text-red-400' :
-                  dragonType === 'indian' ? 'text-emerald-400' :
+                  dragonType === 'eagle' ? 'text-amber-400' :
+                  dragonType === 'serpent' ? 'text-emerald-400' :
                   'text-cyan-400'
                 }`}>{birdsEaten}</span>
                 <span className={`text-[10px] ${isJapaneseInkMode ? 'text-stone-500 font-medium' : 'text-slate-400'}`}>birds</span>

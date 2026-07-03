@@ -42,8 +42,9 @@ export default function ProjectCard({ project, index, isJapaneseInkMode = false 
     <motion.div
       id={`project-card-${project.id}`}
       initial={{ opacity: 0, y: 25, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 50, damping: 15, delay: index * 0.05 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ type: 'spring', stiffness: 50, damping: 15, delay: Math.min(index * 0.05, 0.3) }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onMouseMove={handleMouseMove}
