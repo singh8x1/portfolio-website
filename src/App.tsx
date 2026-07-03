@@ -23,6 +23,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'motion/react';
+import profileImg from './assets/profile.jpg?v=2';
 
 export default function App() {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
@@ -241,7 +242,7 @@ export default function App() {
                   : 'bg-slate-950/40 backdrop-blur-md border-white/[0.04] shadow-2xl shadow-cyan-500/5 hover:border-cyan-500/30'
               }`}>
                 <img 
-                  src={`./profile.jpg?t=${Date.now()}`} 
+                  src={profileImg} 
                   alt="Sandeep Singh" 
                   className="w-full h-full object-cover transition-all duration-700"
                 />
