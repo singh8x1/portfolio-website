@@ -7,8 +7,8 @@ export const PERSONAL_INFO = {
   phone: "+91-6284901073",
   email: "Sandeep.thaparcse@gmail.com",
   location: "Windsor, ON / Punjab, India",
-  github: "https://github.com", // generic placeholder or standard links
-  linkedin: "https://linkedin.com",
+  github: "https://github.com/singh8x1", 
+  linkedin: "https://www.linkedin.com/in/sandeep-singh-755492189/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BF2ns3%2B2JTyy%2BYw1X87KBVg%3D%3D",
   summary: [
     "4+ years of experience in software development, graphics, and full stack applications.",
     "Strong proficiency in PHP, React.js, HTML, CSS, jQuery, Node.js, MySQL, and JavaScript, with experience in real-time rendering, AR development, and performance optimization.",
